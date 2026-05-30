@@ -69,8 +69,10 @@ function computeIkouten(state) {
   // 情報: 情報１必須 + 上位4単位
   const infoGraded = INFO_COURSES.filter(c => state.info[c.id]).map(c => ({ ...c, grade: state.info[c.id] }));
   const info1 = infoGraded.find(c => c.id === "info1");
-  if (info1) all.push(info1);
-  all.push(...selectTop(infoGraded.filter(c => c.id !== "info1"), 4 - (info1?.credits ?? 0)));
+  if (info1) {
+    all.push(info1);
+    all.push(...selectTop(infoGraded.filter(c => c.id !== "info1"), 4 - info1.credits));
+  }
 
   // 基礎科目: 20単位（ア〜オ）
   const found = FOUNDATION_COURSES.filter(c => state.foundation[c.id]).map(c => ({ ...c, grade: state.foundation[c.id] }));
@@ -198,13 +200,19 @@ export default function App() {
   ];
 
   return (
-    <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px", fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px", fontFamily: "system-ui, sans-serif", boxSizing: "border-box", width: "100%"  }}>
       <h1 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 4px" }}>北大移行点計算マシン</h1>
       <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 20px" }}>成績を入力するとゴリラが移行点をリアルタイムで珠をはじいて計算します</p>
 
       <div style={{ textAlign: "center", padding: "24px", background: ikouten ? "#eef2ff" : "#f9fafb", border: `1px solid ${ikouten ? "#c7d2fe" : "#e5e7eb"}`, borderRadius: 14, marginBottom: 24 }}>
         <div style={{ fontSize: 12, color: "#6b7280", letterSpacing: "0.08em" }}>移行点</div>
-        <div style={{ fontSize: 80, fontWeight: 700, lineHeight: 1.1, color: ikouten ? "#4f46e5" : "#d1d5db" }}>
+        <div style={{fontSize: 80, fontWeight: 700, lineHeight: 1.1,color: !ikouten ? "#d1d5db"
+            : ikouten >= 4.0 ? "#dc2626"
+            : ikouten >= 3.7 ? "#9333ea"
+            : "#4f46e5",
+          fontFamily: ikouten >= 4.3 ? "serif" : "system-ui, sans-serif",
+          transition: "color 0.3s, font-family 0.3s",
+        }}>
           {ikouten ?? "—"}
         </div>
         <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>/ 4.30 満点</div>
